@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Shop Owner Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <h2 class="title">Welcome 👋</h2>
+  <p class="subtitle">Login using your mobile number</p>
+
+  <ion-item>
+    <ion-input
+      type="tel"
+      maxlength="10"
+      placeholder="Enter mobile number"
+      [(ngModel)]="mobile">
+    </ion-input>
+  </ion-item>
+
+  <ion-button
+    expand="block"
+    class="ion-margin-top"
+    [disabled]="mobile.length !== 10"
+    (click)="sendOtp()">
+    SEND OTP
+  </ion-button>
+
+</ion-content>

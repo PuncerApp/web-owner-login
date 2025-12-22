@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Shop Registration</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-item>
+    <ion-input placeholder="Owner Name" [(ngModel)]="shop.ownerName"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input placeholder="Shop Name" [(ngModel)]="shop.shopName"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input type="tel" placeholder="Mobile Number" [(ngModel)]="shop.mobile"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-input type="email" placeholder="Email (optional)" [(ngModel)]="shop.email"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-textarea placeholder="Shop Address" [(ngModel)]="shop.address"></ion-textarea>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Vehicle Type</ion-label>
+    <ion-select [(ngModel)]="shop.vehicleType">
+      <ion-select-option value="bike">Bike</ion-select-option>
+      <ion-select-option value="car">Car</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Tube Puncture</ion-label>
+    <ion-checkbox slot="end" [(ngModel)]="shop.services.tube"></ion-checkbox>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Tubeless Puncture</ion-label>
+    <ion-checkbox slot="end" [(ngModel)]="shop.services.tubeless"></ion-checkbox>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Air Fill</ion-label>
+    <ion-checkbox slot="end" [(ngModel)]="shop.services.air"></ion-checkbox>
+  </ion-item>
+
+  <ion-button expand="block" class="ion-margin-top" (click)="submit()">
+    SUBMIT DETAILS
+  </ion-button>
+
+</ion-content>
