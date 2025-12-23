@@ -24,6 +24,12 @@ const routes: Routes = [
     loadComponent: () =>
       import('./pages/owner-onboarding/owner-onboarding.page')
         .then(m => m.OwnerOnboardingPage)
+  },
+  {
+    path: 'owner-status',
+    loadComponent: () =>
+      import('./pages/owner-status/owner-status.page')
+        .then(m => m.OwnerStatusPage)
   }
 ];
 

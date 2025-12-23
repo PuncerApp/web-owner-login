@@ -36,6 +36,6 @@ export class OwnerOnboardingPage {
     alert('Details submitted. Waiting for admin approval ⏳');
 
     // NEXT PAGE (future)
-    // this.router.navigate(['/owner-status']);
+    this.router.navigate(['/owner-status']);
   }
 }
