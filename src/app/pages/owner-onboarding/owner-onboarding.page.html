@@ -6,51 +6,106 @@
 
 <ion-content class="ion-padding">
 
-  <ion-item>
-    <ion-input placeholder="Owner Name" [(ngModel)]="shop.ownerName"></ion-input>
-  </ion-item>
+  <!-- 🏪 BASIC INFO -->
+  <div class="section-card">
+    <h3>🏪 Shop Details*</h3>
 
-  <ion-item>
-    <ion-input placeholder="Shop Name" [(ngModel)]="shop.shopName"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-input placeholder="Owner Name" [(ngModel)]="form.ownerName"></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-input type="tel" placeholder="Mobile Number" [(ngModel)]="shop.mobile"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-input placeholder="Shop Name" [(ngModel)]="form.shopName"></ion-input>
+    </ion-item>
+  </div>
 
-  <ion-item>
-    <ion-input type="email" placeholder="Email (optional)" [(ngModel)]="shop.email"></ion-input>
-  </ion-item>
+  <!-- 📞 CONTACT -->
+  <div class="section-card">
+    <h3>📞 Contact</h3>
 
-  <ion-item>
-    <ion-textarea placeholder="Shop Address" [(ngModel)]="shop.address"></ion-textarea>
-  </ion-item>
+    <ion-item>
+      <ion-input
+        #mobileInput
+        placeholder="Mobile Number"
+        [(ngModel)]="form.mobile"
+        [readonly]="!isEditingMobile">
+      </ion-input>
+      <ion-icon
+        name="create-outline"
+        slot="end"
+        class="edit-icon"
+        (click)="enableMobileEdit()">
+      </ion-icon>
+    </ion-item>
 
-  <ion-item>
-    <ion-label>Vehicle Type</ion-label>
-    <ion-select [(ngModel)]="shop.vehicleType">
-      <ion-select-option value="bike">Bike</ion-select-option>
-      <ion-select-option value="car">Car</ion-select-option>
-    </ion-select>
-  </ion-item>
+    <ion-item>
+      <ion-input type="email" placeholder="Email (optional)" [(ngModel)]="form.email"></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-label>Tube Puncture</ion-label>
-    <ion-checkbox slot="end" [(ngModel)]="shop.services.tube"></ion-checkbox>
-  </ion-item>
+    <ion-item>
+      <ion-textarea placeholder="Shop Address" [(ngModel)]="form.address"></ion-textarea>
+    </ion-item>
+  </div>
 
-  <ion-item>
-    <ion-label>Tubeless Puncture</ion-label>
-    <ion-checkbox slot="end" [(ngModel)]="shop.services.tubeless"></ion-checkbox>
-  </ion-item>
+  <!-- 📍 LOCATION -->
+  <div class="section-card highlight">
+    <h3>📍 Shop Location <span class="required">*</span></h3>
 
-  <ion-item>
-    <ion-label>Air Fill</ion-label>
-    <ion-checkbox slot="end" [(ngModel)]="shop.services.air"></ion-checkbox>
-  </ion-item>
+    <ion-button
+      expand="block"
+      color="primary"
+      (click)="getCurrentLocation()"
+      [disabled]="locationLoading">
 
-  <ion-button expand="block" class="ion-margin-top" (click)="submit()">
-    SUBMIT DETAILS
+      <ion-spinner *ngIf="locationLoading" name="dots"></ion-spinner>
+      <span *ngIf="!locationLoading">Use Current Location</span>
+    </ion-button>
+
+    <div *ngIf="latitude" class="location-success">
+      ✔️ Location captured  
+      <div class="coords">
+        {{ latitude }}, {{ longitude }}
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚲 SERVICES -->
+  <div class="section-card">
+    <h3>🛠 Services Offered</h3>
+
+    <ion-item>
+      <ion-label>Vehicle Type</ion-label>
+      <ion-select [(ngModel)]="form.vehicleType">
+        <ion-select-option value="Bike">Bike</ion-select-option>
+        <ion-select-option value="Car">Car</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-checkbox slot="start" [(ngModel)]="form.tube"></ion-checkbox>
+      <ion-label>Tube Puncture</ion-label>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-checkbox slot="start" [(ngModel)]="form.tubeless"></ion-checkbox>
+      <ion-label>Tubeless Puncture</ion-label>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-checkbox slot="start" [(ngModel)]="form.air"></ion-checkbox>
+      <ion-label>Air Fill</ion-label>
+    </ion-item>
+  </div>
+
+  <!-- ✅ SUBMIT -->
+  <ion-button
+    expand="block"
+    size="large"
+    class="submit-btn"
+    (click)="submit()"
+    [disabled]="!latitude || !longitude">
+
+    Submit Details
   </ion-button>
 
 </ion-content>

@@ -13,27 +13,31 @@ import { FormsModule } from '@angular/forms';
 })
 export class OwnerOtpPage implements OnInit {
 
-  otp: string = '';
-  mobile: string = '';
+  otp = '';
+  mobile = '';
 
   constructor(private router: Router) {}
 
   ngOnInit() {
-    const nav = this.router.getCurrentNavigation();
-    this.mobile = nav?.extras?.state?.['mobile'] || '';
+    this.mobile =
+      history.state?.mobile ||
+      localStorage.getItem('mobile') ||
+      '';
   }
 
   verifyOtp() {
-    // TEMP OTP CHECK
     if (this.otp == '123456') {
-      console.log('OTP verified for:', this.mobile);
 
-      // NEXT STEP (future)
-      this.router.navigate(['/owner-onboarding']);
+      const ownerExists = false; // TEMP
 
-      alert('OTP Verified ✅');
+      if (ownerExists) {
+        localStorage.setItem('ownerStatus', 'PENDING');
+        this.router.navigate(['/owner-status']);
+      } else {
+        this.router.navigate(['/owner-onboarding']);
+      }
+
     } else {
-      console.log('Invalid OTP for:', this.mobile);
       alert('Invalid OTP ❌');
     }
   }

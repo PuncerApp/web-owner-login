@@ -19,12 +19,13 @@ export class OwnerLoginPage {
 
   sendOtp() {
     if (this.mobile.length !== 10) {
+      alert('Enter valid mobile number');
       return;
     }
 
     // TEMP OTP FLOW (Backend later)
     console.log('Sending OTP to:', this.mobile);
-
+    localStorage.setItem('mobile', this.mobile);
     this.router.navigate(['/owner-otp'], {
       state: {
         mobile: this.mobile
