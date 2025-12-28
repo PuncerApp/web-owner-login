@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { OwnerService } from 'src/app/services/owner.service';
 
 type OwnerStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -16,15 +17,11 @@ export class OwnerStatusPage implements OnInit {
 
   status: OwnerStatus = 'PENDING';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private ownerService: OwnerService) {}
 
   ngOnInit() {
-    /**
-     * TEMP LOGIC (Dummy)
-     * Tomorrow backend-la irundhu varum
-     */
-    const mockStatus: OwnerStatus = 'PENDING'; 
-    this.status = mockStatus;
+    const mobile = localStorage.getItem('mobile')!;
+    this.ownerService.getByMobile(mobile).subscribe(owner => this.status = owner.status);
   }
 
   goToProfile() {

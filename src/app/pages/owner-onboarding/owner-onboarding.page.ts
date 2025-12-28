@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule, IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OwnerService } from 'src/app/services/owner.service';
 
 @Component({
   selector: 'app-owner-onboarding',
@@ -29,7 +30,7 @@ export class OwnerOnboardingPage implements OnInit {
     air: false
   };
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private ownerService: OwnerService) {}
 
   ngOnInit() {
     // Auto-fill mobile from login / otp
@@ -87,7 +88,9 @@ export class OwnerOnboardingPage implements OnInit {
     console.log('Final payload:', payload);
 
     // After submit → pending approval
-    localStorage.setItem('ownerStatus', 'PENDING');
-    this.router.navigate(['/owner-status']);
+    this.ownerService.registerOwner(payload)
+    .subscribe(() => {
+      this.router.navigate(['/owner-status']);
+    });
   }
 }

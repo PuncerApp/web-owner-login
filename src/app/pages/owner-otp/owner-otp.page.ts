@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OwnerService } from '../../services/owner.service';
 
 @Component({
   selector: 'app-owner-otp',
@@ -16,7 +17,7 @@ export class OwnerOtpPage implements OnInit {
   otp = '';
   mobile = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private ownerService: OwnerService) {}
 
   ngOnInit() {
     this.mobile =
@@ -28,14 +29,23 @@ export class OwnerOtpPage implements OnInit {
   verifyOtp() {
     if (this.otp == '123456') {
 
-      const ownerExists = false; // TEMP
-
-      if (ownerExists) {
-        localStorage.setItem('ownerStatus', 'PENDING');
-        this.router.navigate(['/owner-status']);
-      } else {
-        this.router.navigate(['/owner-onboarding']);
-      }
+      // 🔥 REAL BACKEND CALL HERE
+      this.ownerService.getByMobile(this.mobile).subscribe({
+        next: (owner) => {
+          if (owner) {
+            // Owner already registered
+            localStorage.setItem('ownerStatus', owner.status);
+            this.router.navigate(['/owner-status']);
+          } else {
+            // New owner → onboarding
+            this.router.navigate(['/owner-onboarding']);
+          }
+        },
+        error: (err) => {
+          console.error('Error checking owner', err);
+          alert('Something went wrong. Try again.');
+        }
+      });
 
     } else {
       alert('Invalid OTP ❌');
