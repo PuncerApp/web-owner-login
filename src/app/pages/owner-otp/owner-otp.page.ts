@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OwnerService } from '../../services/owner.service';
+import { OwnerAuthService } from 'src/app/core/services/owner-auth.service';
 
 @Component({
   selector: 'app-owner-otp',
@@ -17,7 +17,7 @@ export class OwnerOtpPage implements OnInit {
   otp = '';
   mobile = '';
 
-  constructor(private router: Router, private ownerService: OwnerService) {}
+  constructor(private router: Router, private ownerAuth: OwnerAuthService) {}
 
   ngOnInit() {
     this.mobile =
@@ -27,28 +27,34 @@ export class OwnerOtpPage implements OnInit {
   }
 
   verifyOtp() {
-    if (this.otp == '123456') {
-
-      // 🔥 REAL BACKEND CALL HERE
-      this.ownerService.getByMobile(this.mobile).subscribe({
-        next: (owner) => {
-          if (owner) {
-            // Owner already registered
-            localStorage.setItem('ownerStatus', owner.status);
-            this.router.navigate(['/owner-status']);
-          } else {
-            // New owner → onboarding
-            this.router.navigate(['/owner-onboarding']);
-          }
-        },
-        error: (err) => {
-          console.error('Error checking owner', err);
-          alert('Something went wrong. Try again.');
+    this.ownerAuth.verifyOtp(this.mobile, this.otp).subscribe({
+      next: (res: any) => {
+        console.log('OTP verification response:', res);
+  
+        if (res.type === 'NEW') {
+          localStorage.setItem('mobile', this.mobile);
+          this.router.navigate(['/owner-onboarding'], {state: {mobile: this.mobile}}).then(
+            (success) => {
+              console.log('Navigation success:', success);
+            },
+            (error) => {
+              console.error('Navigation error:', error);
+            }
+          );
         }
-      });
-
-    } else {
-      alert('Invalid OTP ❌');
-    }
+  
+        if (res.type === 'EXISTING') {
+          this.ownerAuth.saveToken(res.token);
+          setTimeout(() => {
+            this.router.navigate(['/owner-status']);
+          }, 50);
+        }
+      },
+      error: (err) => {
+        console.error('OTP verification error:', err);
+        alert('OTP verification failed');
+      }
+    });
   }
+  
 }

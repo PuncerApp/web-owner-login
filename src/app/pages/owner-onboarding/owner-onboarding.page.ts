@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule, IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OwnerService } from 'src/app/services/owner.service';
+import { OwnerService } from 'src/app/core/services/owner.service';
 
 @Component({
   selector: 'app-owner-onboarding',
@@ -13,31 +13,46 @@ import { OwnerService } from 'src/app/services/owner.service';
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class OwnerOnboardingPage implements OnInit {
+
   @ViewChild('mobileInput', { static: false }) mobileInput!: IonInput;
+
   isEditingMobile = false;
   latitude: number | null = null;
   longitude: number | null = null;
   locationLoading = false;
+
+  // ✅ UPDATED FORM (ONLY ADDITIONS)
   form = {
     ownerName: '',
     shopName: '',
     mobile: '',
     email: '',
     address: '',
-    vehicleType: 'Bike',
+    vehicleType: 'BIKE',     // BIKE | CAR | BOTH
+    shopType: 'PUNCHER',     // MECHANIC | PUNCHER | BOTH
     tube: false,
     tubeless: false,
     air: false
   };
 
-  constructor(private router: Router, private ownerService: OwnerService) {}
+  constructor(
+    private router: Router,
+    private ownerService: OwnerService
+  ) {}
 
   ngOnInit() {
-    // Auto-fill mobile from login / otp
-    this.form.mobile = localStorage.getItem('mobile') || '';
+    const mobile =
+      history.state?.mobile ||
+      localStorage.getItem('mobile') ||
+      '';
+
+    if (mobile) {
+      this.form.mobile = mobile;
+      localStorage.setItem('mobile', mobile);
+    }
   }
 
-  /** 📍 Get Current Location */
+  /** 📍 Location */
   getCurrentLocation() {
     if (!navigator.geolocation) {
       alert('Geolocation not supported');
@@ -47,36 +62,40 @@ export class OwnerOnboardingPage implements OnInit {
     this.locationLoading = true;
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        this.latitude = position.coords.latitude;
-        this.longitude = position.coords.longitude;
+      (pos) => {
+        this.latitude = pos.coords.latitude;
+        this.longitude = pos.coords.longitude;
         this.locationLoading = false;
-
-        console.log('Lat:', this.latitude, 'Lng:', this.longitude);
       },
       () => {
         this.locationLoading = false;
-        alert('Please allow location access');
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
+        alert('Location permission required');
+      }
     );
   }
 
   enableMobileEdit() {
     this.isEditingMobile = true;
-    // Ionic rendering wait pannitu focus
-    setTimeout(() => {
-      this.mobileInput.setFocus();
-    }, 100);
+    setTimeout(() => this.mobileInput.setFocus(), 100);
   }
 
+  /** ✅ Submit */
   submit() {
     if (!this.form.ownerName || !this.form.shopName) {
-      alert('Fill required fields');
+      alert('Owner name & Shop name required');
       return;
-    } else if(!this.latitude || !this.longitude) {
+    }
+
+    if (!this.latitude || !this.longitude) {
       alert('Location is mandatory');
       return;
+    }
+
+    // 🔐 FRONTEND LOGIC SAFETY
+    if (this.form.shopType === 'MECHANIC') {
+      this.form.tube = false;
+      this.form.tubeless = false;
+      this.form.air = false;
     }
 
     const payload = {
@@ -85,12 +104,21 @@ export class OwnerOnboardingPage implements OnInit {
       longitude: this.longitude
     };
 
-    console.log('Final payload:', payload);
+    console.log('Final payload', payload);
 
-    // After submit → pending approval
-    this.ownerService.registerOwner(payload)
-    .subscribe(() => {
-      this.router.navigate(['/owner-status']);
+    this.ownerService.registerOwner(payload).subscribe({
+      next: () => {
+        alert('Registration successful. Please login again after approval.');
+        
+        // 🔥 IMPORTANT: clear token if any
+        localStorage.removeItem('owner_token');
+
+        // 🔁 Force re-login
+        this.router.navigate(['/owner-login'], {
+          replaceUrl: true
+        });    
+      },
+      error: () => alert('Registration failed')
     });
   }
 }

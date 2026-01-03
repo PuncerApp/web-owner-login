@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { OwnerService } from 'src/app/services/owner.service';
+import { OwnerService } from 'src/app/core/services/owner.service';
 
 type OwnerStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -20,8 +20,24 @@ export class OwnerStatusPage implements OnInit {
   constructor(private router: Router, private ownerService: OwnerService) {}
 
   ngOnInit() {
-    const mobile = localStorage.getItem('mobile')!;
-    this.ownerService.getByMobile(mobile).subscribe(owner => this.status = owner.status);
+    // 🔐 Token iruntha matum /me call pannum
+    const token = localStorage.getItem('owner_token');
+
+    if (!token) {
+      // 🆕 Just registered user
+      this.status = 'PENDING';
+      return;
+    }
+
+    this.ownerService.getMyProfile().subscribe({
+      next: (owner) => {
+        this.status = owner.status;
+      },
+      error: () => {
+        localStorage.removeItem('owner_token');
+        this.router.navigate(['/owner-login'], { replaceUrl: true });
+      }
+    });  
   }
 
   goToProfile() {
@@ -30,6 +46,8 @@ export class OwnerStatusPage implements OnInit {
   }
 
   logout() {
-    this.router.navigate(['/owner-login']);
+    localStorage.removeItem('owner_token');
+      localStorage.removeItem('mobile');
+      this.router.navigate(['/owner-login'], { replaceUrl: true });
   }
 }

@@ -13,6 +13,7 @@ export class OwnerService {
 
   getByMobile(mobile: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/by-mobile/${mobile}`);
+    
   }
 
   registerOwner(payload: any): Observable<any> {
@@ -25,5 +26,11 @@ export class OwnerService {
 
   updateStatus(id: number, status: string) {
     return this.http.put(`${this.baseUrl}/${id}/status/${status}`, {});
+  }
+
+  getMyProfile(): Observable<{ status: 'PENDING' | 'APPROVED' | 'REJECTED' }> {
+    return this.http.get<{ status: 'PENDING' | 'APPROVED' | 'REJECTED' }>(
+      `${this.baseUrl}/me`
+    );
   }
 }
