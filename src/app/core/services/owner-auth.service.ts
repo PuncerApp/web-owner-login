@@ -8,7 +8,7 @@ const OWNER_TOKEN_KEY = 'owner_token';
 @Injectable({ providedIn: 'root' })
 export class OwnerAuthService {
 
-  private API = 'http://localhost:8080/api/owner-auth';
+  private API = 'https://svc-puncher-production.up.railway.app/api/owner-auth';
   private TOKEN_KEY = 'owner_token';
 
   constructor(private http: HttpClient, private router: Router) {}

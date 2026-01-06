@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class OwnerService {
 
-  private baseUrl = 'http://localhost:8080/api/owners';
+  private baseUrl = 'https://svc-puncher-production.up.railway.app/api/owners';
 
   constructor(private http: HttpClient) {}
 
