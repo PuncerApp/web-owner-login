@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OwnerService } from 'src/app/core/services/owner.service';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-owner-onboarding',
@@ -11,31 +13,141 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
-export class OwnerOnboardingPage {
+export class OwnerOnboardingPage implements OnInit {
 
-  shop = {
+  @ViewChild('mobileInput', { static: false }) mobileInput!: IonInput;
+
+  isEditingMobile = false;
+  latitude: number | null = null;
+  longitude: number | null = null;
+  locationLoading = false;
+
+  // ✅ UPDATED FORM (ONLY ADDITIONS)
+  form = {
     ownerName: '',
     shopName: '',
     mobile: '',
     email: '',
     address: '',
-    vehicleType: 'bike', // bike | car
-    services: {
-      tube: false,
-      tubeless: false,
-      air: false
-    }
+    vehicleType: 'BIKE',     // BIKE | CAR | BOTH
+    shopType: 'PUNCHER',     // MECHANIC | PUNCHER | BOTH
+    tube: false,
+    tubeless: false,
+    air: false
   };
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private ownerService: OwnerService
+  ) {}
 
+  ngOnInit() {
+    const mobile =
+      history.state?.mobile ||
+      localStorage.getItem('mobile') ||
+      '';
+
+    if (mobile) {
+      this.form.mobile = mobile;
+      localStorage.setItem('mobile', mobile);
+    }
+  }
+
+  /** 📍 Location */
+  /* async getCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation not supported');
+      return;
+    }
+
+    this.locationLoading = true;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        this.latitude = pos.coords.latitude;
+        this.longitude = pos.coords.longitude;
+        this.locationLoading = false;
+      },
+      () => {
+        this.locationLoading = false;
+        alert('Location permission required');
+      }
+    );
+  } */
+    async getCurrentLocation() {
+      this.locationLoading = true;
+    
+      try {
+        // 🔐 Ask permission first
+        const perm = await Geolocation.requestPermissions();
+    
+        if (perm.location !== 'granted') {
+          alert('Please allow location permission from settings');
+          this.locationLoading = false;
+          return;
+        }
+    
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true
+        });
+    
+        this.latitude = position.coords.latitude;
+        this.longitude = position.coords.longitude;
+    
+      } catch (error) {
+        console.error(error);
+        alert('Unable to fetch location');
+      } finally {
+        this.locationLoading = false;
+      }
+    }
+    
+
+  enableMobileEdit() {
+    this.isEditingMobile = true;
+    setTimeout(() => this.mobileInput.setFocus(), 100);
+  }
+
+  /** ✅ Submit */
   submit() {
-    console.log('Shop Details:', this.shop);
+    if (!this.form.ownerName || !this.form.shopName) {
+      alert('Owner name & Shop name required');
+      return;
+    }
 
-    // TEMP: Direct success
-    alert('Details submitted. Waiting for admin approval ⏳');
+    if (!this.latitude || !this.longitude) {
+      alert('Location is mandatory');
+      return;
+    }
 
-    // NEXT PAGE (future)
-    // this.router.navigate(['/owner-status']);
+    // 🔐 FRONTEND LOGIC SAFETY
+    if (this.form.shopType === 'MECHANIC') {
+      this.form.tube = false;
+      this.form.tubeless = false;
+      this.form.air = false;
+    }
+
+    const payload = {
+      ...this.form,
+      latitude: this.latitude,
+      longitude: this.longitude
+    };
+
+    console.log('Final payload', payload);
+
+    this.ownerService.registerOwner(payload).subscribe({
+      next: () => {
+        alert('Registration successful. Please login again after approval.');
+        
+        // 🔥 IMPORTANT: clear token if any
+        localStorage.removeItem('owner_token');
+
+        // 🔁 Force re-login
+        this.router.navigate(['/owner-login'], {
+          replaceUrl: true
+        });    
+      },
+      error: () => alert('Registration failed')
+    });
   }
 }

@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Shop Status</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">Logout</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- PENDING -->
+  <div *ngIf="status === 'PENDING'" class="status-box pending">
+    <h2>⏳ Approval Pending</h2>
+    <p>Your shop details are under review.</p>
+    <p>Please wait for admin approval.</p>
+  </div>
+
+  <!-- APPROVED -->
+  <div *ngIf="status === 'APPROVED'" class="status-box approved">
+    <h2>✅ Shop Approved</h2>
+    <p>Your shop is now live.</p>
+
+    <!-- DASHBOARD CARD -->
+    <div class="card">
+      <h2>Shop Status</h2>
+      <p>Status: <b>Active</b></p>
+      <p>Today Jobs: 0</p>
+      <p>Earnings: ₹0</p>
+    </div>
+
+    <ion-button expand="block" (click)="goToProfile()">
+      View Profile
+    </ion-button>
+  </div>
+
+  <!-- REJECTED -->
+  <div *ngIf="status === 'REJECTED'" class="status-box rejected">
+    <h2>❌ Approval Rejected</h2>
+    <p>Your shop details were rejected.</p>
+    <p>Please contact support.</p>
+  </div>
+
+</ion-content>

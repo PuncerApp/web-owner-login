@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OwnerAuthService } from 'src/app/core/services/owner-auth.service';
 
 @Component({
   selector: 'app-owner-login',
@@ -15,20 +16,16 @@ export class OwnerLoginPage {
 
   mobile: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private ownerAuth: OwnerAuthService) {}
 
   sendOtp() {
-    if (this.mobile.length !== 10) {
-      return;
-    }
-
-    // TEMP OTP FLOW (Backend later)
-    console.log('Sending OTP to:', this.mobile);
-
-    this.router.navigate(['/owner-otp'], {
-      state: {
-        mobile: this.mobile
-      }
+    this.ownerAuth.sendOtp(this.mobile).subscribe({
+      next: () => {
+        this.router.navigate(['/owner-otp'], {
+          state: { mobile: this.mobile }
+        });
+      },
+      error: () => alert('Failed to send OTP')
     });
   }
 }

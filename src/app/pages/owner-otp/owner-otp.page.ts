@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OwnerAuthService } from 'src/app/core/services/owner-auth.service';
 
 @Component({
   selector: 'app-owner-otp',
@@ -13,28 +14,47 @@ import { FormsModule } from '@angular/forms';
 })
 export class OwnerOtpPage implements OnInit {
 
-  otp: string = '';
-  mobile: string = '';
+  otp = '';
+  mobile = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private ownerAuth: OwnerAuthService) {}
 
   ngOnInit() {
-    const nav = this.router.getCurrentNavigation();
-    this.mobile = nav?.extras?.state?.['mobile'] || '';
+    this.mobile =
+      history.state?.mobile ||
+      localStorage.getItem('mobile') ||
+      '';
   }
 
   verifyOtp() {
-    // TEMP OTP CHECK
-    if (this.otp == '123456') {
-      console.log('OTP verified for:', this.mobile);
-
-      // NEXT STEP (future)
-      this.router.navigate(['/owner-onboarding']);
-
-      alert('OTP Verified ✅');
-    } else {
-      console.log('Invalid OTP for:', this.mobile);
-      alert('Invalid OTP ❌');
-    }
+    this.ownerAuth.verifyOtp(this.mobile, this.otp).subscribe({
+      next: (res: any) => {
+        console.log('OTP verification response:', res);
+  
+        if (res.type === 'NEW') {
+          localStorage.setItem('mobile', this.mobile);
+          this.router.navigate(['/owner-onboarding'], {state: {mobile: this.mobile}}).then(
+            (success) => {
+              console.log('Navigation success:', success);
+            },
+            (error) => {
+              console.error('Navigation error:', error);
+            }
+          );
+        }
+  
+        if (res.type === 'EXISTING') {
+          this.ownerAuth.saveToken(res.token);
+          setTimeout(() => {
+            this.router.navigate(['/owner-status']);
+          }, 50);
+        }
+      },
+      error: (err) => {
+        console.error('OTP verification error:', err);
+        alert('OTP verification failed');
+      }
+    });
   }
+  
 }
