@@ -1,9 +1,9 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.puncher.owner',
-  appName: 'Puncher Owner',
-  webDir: 'dist/web-owner-login/browser'
+  appId: 'io.ionic.starter',
+  appName: 'web-owner-app',
+  webDir: 'www'
 };
 
 export default config;

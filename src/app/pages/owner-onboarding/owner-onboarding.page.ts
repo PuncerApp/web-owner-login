@@ -4,6 +4,7 @@ import { IonicModule, IonInput } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OwnerService } from 'src/app/core/services/owner.service';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-owner-onboarding',
@@ -53,7 +54,7 @@ export class OwnerOnboardingPage implements OnInit {
   }
 
   /** 📍 Location */
-  getCurrentLocation() {
+  /* async getCurrentLocation() {
     if (!navigator.geolocation) {
       alert('Geolocation not supported');
       return;
@@ -72,7 +73,35 @@ export class OwnerOnboardingPage implements OnInit {
         alert('Location permission required');
       }
     );
-  }
+  } */
+    async getCurrentLocation() {
+      this.locationLoading = true;
+    
+      try {
+        // 🔐 Ask permission first
+        const perm = await Geolocation.requestPermissions();
+    
+        if (perm.location !== 'granted') {
+          alert('Please allow location permission from settings');
+          this.locationLoading = false;
+          return;
+        }
+    
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true
+        });
+    
+        this.latitude = position.coords.latitude;
+        this.longitude = position.coords.longitude;
+    
+      } catch (error) {
+        console.error(error);
+        alert('Unable to fetch location');
+      } finally {
+        this.locationLoading = false;
+      }
+    }
+    
 
   enableMobileEdit() {
     this.isEditingMobile = true;
